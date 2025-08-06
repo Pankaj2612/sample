@@ -2,10 +2,14 @@ import { publicProcedure, router } from "./trpc";
 import z from "zod";
 import { GoogleGenAI } from "@google/genai";
 import { supabase } from "@/lib/supabase/server";
+
 export const appRouter = router({
   askGemini: publicProcedure.input(z.string()).mutation(async ({ input }) => {
+ 
+    console.log("GEmini key", process.env.GEMINI_API_KEY);
+
     const ai = new GoogleGenAI({
-      apiKey: process.env.NEXT_PUBLIC_API_KEY,
+      apiKey: process.env.GEMINI_API_KEY,
     });
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

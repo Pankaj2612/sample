@@ -226,6 +226,7 @@ export default function ChatPage() {
                   <div className="d-flex justify-content-between align-items-start">
                     <span className="text-truncate">{conversation.title}</span>
                   </div>
+                  <small>{conversation?.messages?.length} messages</small>
                 </button>
               ))}
 
