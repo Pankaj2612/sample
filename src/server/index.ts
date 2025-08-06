@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase/server";
 export const appRouter = router({
   askGemini: publicProcedure.input(z.string()).mutation(async ({ input }) => {
     const ai = new GoogleGenAI({
-      apiKey: "AIzaSyD6Sd4Nnt9cdFxzBAqohL8qVPsMca_IwIQ",
+      apiKey: process.env.NEXT_PUBLIC_API_KEY,
     });
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
