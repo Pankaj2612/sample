@@ -3,6 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "./_trpc/client";
 import { useUser } from "@auth0/nextjs-auth0";
+import {
+  Search,
+  Menu,
+  MessageCircle,
+  Sparkles,
+  PenTool,
+  FileText,
+  Mic,
+  Volume2,
+  Plus,
+} from "lucide-react";
 interface Message {
   id: string;
   content: string;
@@ -58,6 +69,24 @@ export default function ChatPage() {
   const currentConversation = conversations.find(
     (conv) => conv.id === currentConversationId
   );
+  const suggestionButtons = [
+    {
+      icon: <Sparkles className="me-2" size={16} />,
+      text: "Create image",
+      color: "success",
+    },
+    {
+      icon: <PenTool className="me-2" size={16} />,
+      text: "Help me write",
+      color: "primary",
+    },
+    {
+      icon: <FileText className="me-2" size={16} />,
+      text: "Summarize text",
+      color: "warning",
+    },
+    { text: "More", color: "secondary" },
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -73,8 +102,18 @@ export default function ChatPage() {
       userId: user?.sub,
       title: "New Chat",
     });
+    console.log(response);
 
-    setConversations((prev) => [response, ...prev]);
+    const newConversation: Conversation = {
+      title: response.title,
+      id: response.id,
+      messages: [],
+      lastUpdated: response.last_updated,
+    };
+
+    console.log(newConversation);
+
+    setConversations((prev) => [newConversation, ...prev]);
     setCurrentConversationId(response.id);
     setSidebarOpen(false);
   };
@@ -105,7 +144,7 @@ export default function ChatPage() {
         id: response.id,
         title: response.title,
         messages: [message_reponse],
-        lastUpdated: response.lastUpdated,
+        lastUpdated: response.last_updated,
       };
       setConversations((prev) => [newConversation, ...prev]);
     } else {
@@ -124,17 +163,19 @@ export default function ChatPage() {
             : inputMessage.slice(0, 30) +
               (inputMessage.length > 30 ? "..." : ""),
       });
+
       setConversations((prev) =>
         prev.map((conv) =>
           conv.id === currentConversationId
             ? {
                 ...conv,
-                messages: [...conv.messages, response],
+                messages: [...(conv.messages || []), response],
                 title:
                   conv.messages.length === 0
                     ? inputMessage.slice(0, 30) +
                       (inputMessage.length > 30 ? "..." : "")
                     : conv.title,
+                lastUpdated: convo_update.last_updated,
               }
             : conv
         )
@@ -191,9 +232,7 @@ export default function ChatPage() {
           <a href="/auth/login" className="btn btn-primary">
             Log In
           </a>
-          <a
-            href="/auth/login?screen_hint=signup"
-            className="btn btn-primary">
+          <a href="/auth/login?screen_hint=signup" className="btn btn-primary">
             Sign Up
           </a>
         </div>
@@ -203,33 +242,143 @@ export default function ChatPage() {
   return (
     <div className="container-fluid p-0 h-100">
       <div className="row h-100 g-0">
-        {/* Main Chat Area */}
-        <div className="col-12 col-md-9 col-lg-10 chat-container">
-          {/* Mobile Menu Button */}
-          <div className="d-md-none p-3 bg-dark">
+        {/* Sidebar */}
+        <div className={`sidebar ${sidebarOpen ? "show" : ""}`}>
+          {/* Mobile Header */}
+          <div className="d-md-none mobile-sidebar-header">
+            <div className="search-container">
+              <Search size={20} />
+              <input
+                type="text"
+                placeholder="Search"
+                className="search-input"
+              />
+            </div>
+          </div>
+
+          <div className="p-3">
+            {/* Desktop New Chat Button */}
             <button
-              className="btn btn-outline-secondary"
-              type="button"
-              aria-label="Open sidebar"
-              onClick={() => setSidebarOpen(true)}
-            >
-              ☰ Menu
+              className="new-chat-btn d-none d-md-block"
+              onClick={createNewConversation}>
+              + New Chat
+            </button>
+
+            {/* Mobile Navigation Items */}
+            <div className="d-md-none mobile-nav-items">
+              <div className="nav-item">
+                <Plus size={20} />
+                <span onClick={createNewConversation}>New Chat</span>
+              </div>
+            </div>
+
+            <div className="conversations-list">
+              <h6 className=" mb-3 d-none d-md-block">Recent Conversations</h6>
+              {conversations.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  className={`conversation-item ${
+                    conversation.id === currentConversationId ? "active" : ""
+                  }`}
+                  onClick={() => selectConversation(conversation.id)}>
+                  <div className="d-flex justify-content-between align-items-start">
+                    <span className="text-truncate">{conversation.title}</span>
+                  </div>
+                </button>
+              ))}
+
+              {conversations.length === 0 && (
+                <p className=" small d-none d-md-block">
+                  No conversations yet. Start a new chat!
+                </p>
+              )}
+            </div>
+
+            {/* Mobile User Profile */}
+            <div className="d-md-none mobile-user-profile">
+              <div className="user-avatar">P</div>
+              <span>{user?.name}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Chat Area */}
+        <div className="chat-container">
+          {/* Mobile Menu Button */}
+          <div className="d-md-none mobile-header">
+            <button
+              className="btn-icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <Menu size={20} />
+            </button>
+            <div className="mobile-title">
+              <span>Get Plus</span>
+              <span className="plus-icon">+</span>
+            </div>
+            <button className="btn-icon">
+              <div className="refresh-icon">⟲</div>
             </button>
           </div>
+
           {/* Messages Container */}
           <div className="messages-container">
             {!currentConversation ? (
-              <div className="text-center mt-5">
-                <h2 className="text-light mb-4">ChatGPT Clone</h2>
-                <p className="text-light">Start a conversation by typing a message below.</p>
+              <div className="welcome-screen">
+                <div className="d-none d-md-block text-center">
+                  <h2 className="text-light mb-4">ChatGPT Clone</h2>
+                  <p className="">
+                    Start a conversation by typing a message below.
+                  </p>
+                </div>
+
+                {/* Mobile Welcome Screen */}
+                <div className="d-md-none mobile-welcome">
+                  <h1 className="welcome-title">What can I help with?</h1>
+                  <div className="suggestion-buttons">
+                    {suggestionButtons.map((button, index) => (
+                      <button
+                        key={index}
+                        className={`suggestion-btn btn-outline-${button.color}`}
+                        onClick={() => {
+                          if (button.text !== "More") {
+                            setInputMessage(`Help me with: ${button.text}`);
+                          }
+                        }}>
+                        {button.icon}
+                        {button.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="d-none d-md-block desktop-welcome">
+                  <h1 className="welcome-title">What can I help with?</h1>
+                  <div className="suggestion-buttons desktop-suggestions">
+                    {suggestionButtons.map((button, index) => (
+                      <button
+                        key={index}
+                        className={`suggestion-btn btn-outline-${button.color}`}
+                        onClick={() => {
+                          if (button.text !== "More") {
+                            setInputMessage(`Help me with: ${button.text}`);
+                          }
+                        }}>
+                        {button.icon}
+                        {button.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <>
-                {(currentConversation?.messages ?? []).map((message) => (
-                  <div key={message.id} className={`message ${message.role}`}> 
-                    <div className="message-content">{message.content}</div>
-                  </div>
-                ))}
+                {currentConversation?.messages &&
+                  currentConversation.messages.map((message) => (
+                    <div key={message.id} className={`message ${message.role}`}>
+                      <div className="message-content">{message.content}</div>
+                    </div>
+                  ))}
+
                 {isTyping && (
                   <div className="message assistant">
                     <div className="message-content">
@@ -248,84 +397,47 @@ export default function ChatPage() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
           {/* Input Container */}
           <div className="input-container">
-            <div className="input-group">
+            <div className="input-group desktop-input-group">
+              <button className="btn-icon d-md-none input-icon-left">
+                <MessageCircle size={20} />
+              </button>
               <textarea
                 ref={textareaRef}
                 className="form-control"
-                placeholder="Type your message here..."
+                placeholder="Ask anything"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 rows={1}
-                style={{ resize: "none" }}
               />
+              <button className="btn-icon d-md-none input-icon-right">
+                <Mic size={20} />
+              </button>
+              <button className="btn-icon d-md-none input-icon-right">
+                <Volume2 size={20} />
+              </button>
               <button
-                className="btn btn-primary ms-2"
+                className="btn btn-primary ms-2 d-none d-md-block"
                 onClick={sendMessage}
-                disabled={!inputMessage.trim() || isTyping}
-              >
+                disabled={!inputMessage.trim() || isTyping}>
                 Send
               </button>
             </div>
           </div>
         </div>
-        {/* Sidebar - always rendered above main content for mobile */}
-        <div
-          className={`col-12 col-md-3 col-lg-2 sidebar d-flex flex-column h-100${sidebarOpen ? ' show' : ''}`}
-          style={{ zIndex: 1050 }}
-        >
-          {/* Top Section (New Chat + Conversations) */}
-          <div className="p-3 flex-grow-1 overflow-auto">
-            <button className="new-chat-btn" onClick={createNewConversation}>
-              + New Chat
-            </button>
-            <div className="conversations-list">
-              <h6 className="mb-3">Recent Conversations</h6>
-              {conversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  className={`conversation-item ${conversation.id === currentConversationId ? "active" : ""}`}
-                  onClick={() => selectConversation(conversation.id)}
-                >
-                  <div className="d-flex justify-content-between align-items-start">
-                    <span className="text-truncate">{conversation.title}</span>
-                  </div>
-                  <small>{conversation?.messages?.length} messages</small>
-                </button>
-              ))}
-              {conversations.length === 0 && (
-                <p className="small">No conversations yet. Start a new chat!</p>
-              )}
-            </div>
-          </div>
-          {/* Bottom Section (User Profile) */}
-          <div className="p-3">
-            <div className="d-flex align-items-center gap-2">
-              <img
-                src={user?.picture || "/default-avatar.png"}
-                alt="User avatar"
-                className="rounded-circle"
-                width="40"
-                height="40"
-              />
-              <div className="text-truncate">
-                <strong className="d-block">{user?.name || "User"}</strong>
-                <small>{user?.email}</small>
-              </div>
-            </div>
-          </div>
-          {/* Mobile Sidebar Overlay */}
-          {sidebarOpen && (
-            <div
-              className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-md-none"
-              style={{ zIndex: 1040 }}
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
-        </div>
       </div>
+
+      {/* Sidebar Overlay for Mobile */}
+      {sidebarOpen && (
+        <div
+          className="sidebar-overlay d-md-none"
+          style={{ zIndex: 1040 }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
