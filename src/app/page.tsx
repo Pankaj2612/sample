@@ -94,7 +94,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [currentConversation?.messages, isTyping]);
+  }, [isTyping]);
 
   const createNewConversation = async () => {
     if (!user) return;
