@@ -400,7 +400,7 @@ export default function ChatPage() {
 
           {/* Input Container */}
           <div className="input-container">
-            <div className="input-group desktop-input-group">
+            <div className="input-group">
               <button className="btn-icon d-md-none input-icon-left">
                 <MessageCircle size={20} />
               </button>
