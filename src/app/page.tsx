@@ -193,7 +193,7 @@ export default function ChatPage() {
           </a>
           <a
             href="/auth/login?screen_hint=signup"
-            className="btn btn-outline-secondary">
+            className="btn btn-primary">
             Sign Up
           </a>
         </div>
