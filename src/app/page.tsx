@@ -13,6 +13,7 @@ import {
   Mic,
   Volume2,
   Plus,
+  Send,
 } from "lucide-react";
 interface Message {
   id: string;
@@ -413,11 +414,9 @@ export default function ChatPage() {
                 onKeyPress={handleKeyPress}
                 rows={1}
               />
+
               <button className="btn-icon d-md-none input-icon-right">
-                <Mic size={20} />
-              </button>
-              <button className="btn-icon d-md-none input-icon-right">
-                <Volume2 size={20} />
+                <Send onClick={sendMessage} size={20} />
               </button>
               <button
                 className="btn btn-primary ms-2 d-none d-md-block"
