@@ -205,39 +205,33 @@ export default function ChatPage() {
       <div className="row h-100 g-0">
         {/* Sidebar */}
         <div
-          className={`col-md-3 col-lg-2 sidebar  d-flex flex-column h-100 ${
-            sidebarOpen ? "show" : ""
-          }`}>
+          className={`col-12 col-md-3 col-lg-2 sidebar d-flex flex-column h-100 ${sidebarOpen ? "show" : ""}`}
+          style={{ zIndex: 1050 }}
+        >
           {/* Top Section (New Chat + Conversations) */}
           <div className="p-3 flex-grow-1 overflow-auto">
             <button className="new-chat-btn" onClick={createNewConversation}>
               + New Chat
             </button>
-
             <div className="conversations-list">
-              <h6 className=" mb-3">Recent Conversations</h6>
+              <h6 className="mb-3">Recent Conversations</h6>
               {conversations.map((conversation) => (
                 <button
                   key={conversation.id}
-                  className={`conversation-item ${
-                    conversation.id === currentConversationId ? "active" : ""
-                  }`}
-                  onClick={() => selectConversation(conversation.id)}>
+                  className={`conversation-item ${conversation.id === currentConversationId ? "active" : ""}`}
+                  onClick={() => selectConversation(conversation.id)}
+                >
                   <div className="d-flex justify-content-between align-items-start">
                     <span className="text-truncate">{conversation.title}</span>
                   </div>
                   <small>{conversation?.messages?.length} messages</small>
                 </button>
               ))}
-
               {conversations.length === 0 && (
-                <p className=" small">
-                  No conversations yet. Start a new chat!
-                </p>
+                <p className="small">No conversations yet. Start a new chat!</p>
               )}
             </div>
           </div>
-
           {/* Bottom Section (User Profile) */}
           <div className="p-3">
             <div className="d-flex align-items-center gap-2">
@@ -248,43 +242,46 @@ export default function ChatPage() {
                 width="40"
                 height="40"
               />
-
               <div className="text-truncate">
                 <strong className="d-block">{user?.name || "User"}</strong>
                 <small>{user?.email}</small>
               </div>
             </div>
           </div>
+          {/* Mobile Sidebar Overlay */}
+          {sidebarOpen && (
+            <div
+              className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-md-none"
+              style={{ zIndex: 1040 }}
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
         </div>
-
         {/* Main Chat Area */}
-        <div className="col-md-9 col-lg-10 chat-container">
+        <div className="col-12 col-md-9 col-lg-10 chat-container">
           {/* Mobile Menu Button */}
           <div className="d-md-none p-3 bg-dark">
             <button
               className="btn btn-outline-secondary"
-              onClick={() => setSidebarOpen(!sidebarOpen)}>
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
               ☰ Menu
             </button>
           </div>
-
           {/* Messages Container */}
           <div className="messages-container">
             {!currentConversation ? (
               <div className="text-center mt-5">
                 <h2 className="text-light mb-4">ChatGPT Clone</h2>
-                <p className="text-light">
-                  Start a conversation by typing a message below.
-                </p>
+                <p className="text-light">Start a conversation by typing a message below.</p>
               </div>
             ) : (
               <>
                 {(currentConversation?.messages ?? []).map((message) => (
-                  <div key={message.id} className={`message ${message.role}`}>
+                  <div key={message.id} className={`message ${message.role}`}> 
                     <div className="message-content">{message.content}</div>
                   </div>
                 ))}
-
                 {isTyping && (
                   <div className="message assistant">
                     <div className="message-content">
@@ -303,7 +300,6 @@ export default function ChatPage() {
             )}
             <div ref={messagesEndRef} />
           </div>
-
           {/* Input Container */}
           <div className="input-container">
             <div className="input-group">
@@ -320,22 +316,14 @@ export default function ChatPage() {
               <button
                 className="btn btn-primary ms-2"
                 onClick={sendMessage}
-                disabled={!inputMessage.trim() || isTyping}>
+                disabled={!inputMessage.trim() || isTyping}
+              >
                 Send
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Sidebar Overlay for Mobile */}
-      {sidebarOpen && (
-        <div
-          className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-md-none"
-          style={{ zIndex: 1040 }}
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 }

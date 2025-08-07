@@ -6,7 +6,6 @@ import { supabase } from "@/lib/supabase/server";
 export const appRouter = router({
   askGemini: publicProcedure.input(z.string()).mutation(async ({ input }) => {
  
-    console.log("GEmini key", process.env.GEMINI_API_KEY);
 
     const ai = new GoogleGenAI({
       apiKey: process.env.GEMINI_API_KEY,
