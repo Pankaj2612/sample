@@ -657,3 +657,23 @@ body {
     font-size: 1.75rem;
   }
 }
+
+@media (max-width: 767px) {
+  .input-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: #000; /* Or match your input background */
+    padding: 12px 16px;
+    border-top: 1px solid #4d4d4f;
+  }
+
+  .messages-container {
+    padding-bottom: 90px; /* Prevent input bar from overlapping messages */
+  }
+}
+.messages-container {
+  scroll-behavior: smooth;
+}
